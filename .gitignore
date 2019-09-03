@@ -10,7 +10,7 @@ firebase-debug.log*
 .firebase/
 
 # Firebase config
-socialite-780d-firebase-adminsdk-7a6qz-0b8e5d3d20.json
+./socialite-780d-firebase-adminsdk-7a6qz-0b8e5d3d20.json
 
 # Uncomment this if you'd like others to create their own Firebase project.
 # For a team working on the same Firebase project(s), it is recommended to leave
