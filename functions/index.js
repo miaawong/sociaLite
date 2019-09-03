@@ -30,7 +30,7 @@ app.get("/thoughts", (req, res) => {
 
 app.post("/thought", (req, res) => {
     // to prevent a get request with a status code of 400 instead of 500
-    // !!! not needed anymore since we switch to express, which handles this for us
+    // !!!! not needed anymore since we switch to express, which handles this for us
     // if (req.method !== "POST") {
     //     return res.status(400).json({ error: "Method not allowed" });
     // }
