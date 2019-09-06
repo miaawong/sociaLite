@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const serviceAccount = require("./socialite-780ad-firebase-adminsdk-7a6qz-5eb0ce02ba.json");
+const serviceAccount = require("./socialite.json");
 const app = require("express")();
 
 const config = {
