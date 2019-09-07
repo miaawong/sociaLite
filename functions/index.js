@@ -40,6 +40,18 @@ app.get("/thoughts", (req, res) => {
         .catch(err => console.error(err));
 });
 
+//helper methods
+const isEmail = email => {
+    const regEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (email.match(regEx)) return true;
+    else return false;
+};
+const isEmpty = str => {
+    // elminate spaces
+    if (str.trim() === "") return true;
+    else return false;
+};
+
 app.post("/thought", (req, res) => {
     // to prevent a get request with a status code of 400 instead of 500
     // !!!! not needed anymore since we switch to express, which handles this for us
@@ -70,6 +82,18 @@ app.post("/signup", (req, res) => {
         confirmPassword: req.body.confirmPassword,
         handle: req.body.handle
     };
+
+    let errors = {};
+
+    if (isEmpty(newUser.email)) {
+        errors.email = "Must not be empty";
+    } else if (!isEmail(newUser.email)) {
+        errors.email = "Please enter a valid email";
+    }
+
+    if (isEmpty(newUser.password)) {
+        errors.password = "Must not be empty";
+    }
     // TODO validate data
     let token, userId;
     db.doc(`/users/${newUser.handle}`)
