@@ -83,8 +83,8 @@ app.post("/signup", (req, res) => {
         handle: req.body.handle
     };
 
+    //create an error object to store all our validation errors
     let errors = {};
-
     if (isEmpty(newUser.email)) {
         errors.email = "Must not be empty";
     } else if (!isEmail(newUser.email)) {
@@ -94,6 +94,15 @@ app.post("/signup", (req, res) => {
     if (isEmpty(newUser.password)) {
         errors.password = "Must not be empty";
     }
+    if (newUser.password !== newUser.confirmPassword)
+        errors.confirmPassword = "Passwords must match";
+    if (isEmpty(newUser.handle)) {
+        errors.handle = "Must not be empty";
+    }
+
+    // if the object, 'error' is more than 0, return 400;
+    if (Object.keys(errors).length > 0) return res.status(400).json(errors);
+
     // TODO validate data
     let token, userId;
     db.doc(`/users/${newUser.handle}`)
@@ -137,6 +146,38 @@ app.post("/signup", (req, res) => {
                 return res
                     .status(400)
                     .json({ email: "email is already in use" });
+            } else {
+                return res.status(500).json({ error: err.code });
+            }
+        });
+});
+
+// login route
+app.post("/login", (req, res) => {
+    const user = {
+        email: req.body.email,
+        password: req.body.password
+    };
+    let errors = {};
+    if (isEmpty(user.email)) errors.email = "Must not be empty";
+    if (isEmpty(user.password)) errors.passwords = "Must not be empty";
+    if (Object.keys(errors).length > 0) return res.status(404).json(errors);
+
+    firebase
+        .auth()
+        .signInWithEmailAndPassword(user.email, user.password)
+        .then(data => {
+            return data.user.getIdToken();
+        })
+        .then(token => {
+            return res.json({ token });
+        })
+        .catch(err => {
+            console.error(err);
+            if (err.code === "auth/wrong-password") {
+                return res
+                    .status(403)
+                    .json({ general: "Wrong credentials, try again" });
             } else {
                 return res.status(500).json({ error: err.code });
             }
