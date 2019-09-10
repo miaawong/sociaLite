@@ -11,6 +11,7 @@ firebase-debug.log*
 
 # Firebase config
 socialite.json
+functions/util/config.js
 
 
 # Uncomment this if you'd like others to create their own Firebase project.
