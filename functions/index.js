@@ -52,7 +52,44 @@ const isEmpty = str => {
     else return false;
 };
 
-app.post("/thought", (req, res) => {
+const FBAuth = (req, res, next) => {
+    let idToken;
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer ")
+    ) {
+        idToken = req.headers.authorization.split("Bearer ")[1];
+    } else {
+        console.error("No token found!");
+        return res.status(403).json({ error: "Unauthorized" });
+    }
+    // verify token is valid (from our site)
+    admin
+        .auth()
+        .verifyIdToken(idToken)
+        .then(decodedToken => {
+            //decodedToken has user data
+            req.user = decodedToken;
+            console.log(decodedToken);
+            // we need our handle, which is stored in db collection's 'users'
+            return db
+                .collection("users")
+                .where("userId", "==", req.user.uid)
+                .limit(1)
+                .get();
+        })
+        .then(data => {
+            req.user.handle = data.docs[0].data().handle;
+            return next();
+        })
+        .catch(err => {
+            console.error("Error while verifying token", err);
+            return res.status(403).json(err);
+        });
+};
+
+// passing an second argument can be done
+app.post("/thought", FBAuth, (req, res) => {
     // to prevent a get request with a status code of 400 instead of 500
     // !!!! not needed anymore since we switch to express, which handles this for us
     // if (req.method !== "POST") {
@@ -60,7 +97,7 @@ app.post("/thought", (req, res) => {
     // }
     const newThought = {
         body: req.body.body,
-        userHandle: req.body.userHandle,
+        userHandle: req.user.handle,
         createdAt: new Date().toISOString()
     };
     db.collection("thoughts")
