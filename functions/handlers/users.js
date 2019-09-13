@@ -105,19 +105,26 @@ exports.uploadImage = (req, res) => {
 
     let imageFileName;
     let imageToBeUploaded = {};
+
     busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
         console.log(fieldname);
         console.log(filename);
         console.log(mimetype);
+        // making sure we are only allowing images to be uploaded (mimetype)
+        if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
+            return res
+                .status(400)
+                .json({ error: "Please submit an image file" });
+        }
         // image.png
+        // give us index of the last item
         const imageExtension = filename.split(".")[
-            // give us index of the last item
             filename.split(".").length - 1
         ];
         // 435348590348.png
-        const imageFileName = `${Math.round(
+        imageFileName = `${Math.round(
             Math.random() * 100000000000
-        )}.${imageExtension}`;
+        ).toString()}.${imageExtension}`;
 
         const filepath = path.join(os.tmpdir(), imageFileName);
         imageToBeUploaded = { filepath, mimetype };
@@ -148,4 +155,5 @@ exports.uploadImage = (req, res) => {
                 return res.status(500).json({ error: err.code });
             });
     });
+    busboy.end(req.rawBody);
 };

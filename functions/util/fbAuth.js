@@ -18,7 +18,6 @@ module.exports = (req, res, next) => {
         .then(decodedToken => {
             //decodedToken has user data
             req.user = decodedToken;
-            console.log(decodedToken);
             // we need our handle, which is stored in db collection's 'users'
             return db
                 .collection("users")
