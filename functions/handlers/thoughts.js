@@ -39,3 +39,66 @@ exports.postThought = (req, res) => {
             console.error(err);
         });
 };
+//get one thought
+exports.getThought = (req, res) => {
+    let thoughtData = {};
+    db.doc(`/thoughts/${req.params.thoughtId}`)
+        .get()
+        .then(doc => {
+            if (!doc.exists) {
+                return res.status(404).json({ error: "Thought not found" });
+            }
+            // else then return thoughtData to doc.data(which is a function)
+            thoughtData = doc.data();
+            thoughtData.thoughtId = doc.id;
+            //fetch comments
+            return (
+                db
+                    .collection("comments")
+                    // to order the comments by their date
+                    .orderBy("createdAt", "desc")
+                    .where("thoughtId", "==", req.params.thoughtId)
+                    .get()
+            );
+        })
+        .then(data => {
+            thoughtData.comments = [];
+            data.forEach(doc => {
+                thoughtData.comments.push(doc.data());
+            });
+            return res.json(thoughtData);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ error: err.code });
+        });
+};
+
+// comment on a thought
+exports.commentOnThought = (req, res) => {
+    // validate
+    if (req.body.body.trim() === "")
+        return res.status(400).json({ comment: "must not be empty " });
+    const newComment = {
+        body: req.body.body,
+        createdAt: new Date().toISOString(),
+        thoughtId: req.params.thoughtId,
+        userHandle: req.user.handle,
+        userImage: req.user.imageUrl
+    };
+    db.doc(`/thoughts/${req.params.thoughtId}`)
+        .get()
+        .then(doc => {
+            if (!doc.exists) {
+                res.status(404).json({ error: "not found" });
+            }
+            return db.collection("comments").add(newComment);
+        })
+        .then(() => {
+            res.json(newComment);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: "Something went wrong" });
+        });
+};
