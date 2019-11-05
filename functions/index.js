@@ -7,7 +7,8 @@ const {
     getThought,
     commentOnThought,
     likeThought,
-    unlikeThought
+    unlikeThought,
+    deleteThought
 } = require("./handlers/thoughts");
 const {
     signUp,
@@ -22,6 +23,7 @@ const FBAuth = require("./util/fbAuth");
 app.get("/thoughts", getAllThoughts);
 app.post("/thought", FBAuth, postThought);
 app.get("/thought/:thoughtId", getThought);
+app.delete("/thought/:thoughtId", FBAuth, deleteThought);
 app.post("/thought/:thoughtId/comment", FBAuth, commentOnThought);
 app.get("/thought/:thoughtId/like", FBAuth, likeThought);
 app.get("/thought/:thoughtId/unlike", FBAuth, unlikeThought);
